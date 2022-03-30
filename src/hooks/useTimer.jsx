@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 
 const useTimer = () => {
     const [centisecond, setCentisecond] = useState(0);
@@ -7,35 +7,35 @@ const useTimer = () => {
     const [timerInterval, setTimerInterval] = useState(null);
     const [laps, setLaps] = useState([]);
 
-    let prevLap = useRef(0);
+    const prevLap = useRef(0);
 
-    const start = () => {
-        let _interval = setInterval(() => {
+    const start = useCallback(() => {
+        const _interval = setInterval(() => {
             setCentisecond((prev) => prev + 1);
         }, 10);
         setTimerInterval(_interval);
         setIsRunning((prev) => !prev);
-    };
+    }, []);
 
-    const pause = () => {
+    const pause = useCallback(() => {
         clearInterval(timerInterval);
         setTimerInterval(null);
         setIsRunning((prev) => !prev);
-    };
+    }, [timerInterval]);
 
-    const createLap = () => {
+    const createLap = useCallback(() => {
         setLapCount((prev) => prev + 1);
         const lapTime = centisecond - prevLap.current;
         setLaps((prev) => [[lapCount, lapTime], ...prev]);
         prevLap.current = centisecond;
-    };
+    }, [centisecond, lapCount]);
 
-    const reset = () => {
+    const reset = useCallback(() => {
         setCentisecond(0);
         setLapCount(0);
         prevLap.current = 0;
         setLaps([]);
-    };
+    }, []);
 
     return { centisecond, start, pause, createLap, reset, isRunning, laps };
 };
